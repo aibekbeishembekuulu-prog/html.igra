@@ -1,205 +1,36 @@
-﻿<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Игра на удачу</title>
-
-<style>
-body{
-  margin:0;
-  font-family:Arial;
-  background: radial-gradient(circle at top,#0f172a,#020617);
-  text-align:center;
-  color:white;
-  overflow:hidden;
-}
-
-h1{
-  margin-top:20px;
-  color:#00f5ff;
-  text-shadow:0 0 20px #00f5ff,0 0 40px #00f5ff;
-}
-
-.container{
-  position:relative;
-  width:380px;
-  height:380px;
-  margin:40px auto;
-}
-
-.wheel{
-  width:100%;
-  height:100%;
-  border-radius:50%;
-  position:relative;
-  overflow:hidden;
-  border:14px solid #00f5ff;
-  box-shadow:0 0 40px #00f5ff,inset 0 0 30px black;
-  transition:transform 5s cubic-bezier(0.2,0.8,0.2,1);
-}
-
-.sector{
-  position:absolute;
-  width:50%;
-  height:50%;
-  top:50%;
-  left:50%;
-  transform-origin:0% 0%;
-  clip-path:polygon(0 0,100% 0,100% 100%);
-}
-
-.sector span{
-  position:absolute;
-  left:18px;
-  top:28px;
-  font-size:12px;
-  font-weight:bold;
-  color:white;
-}
-
-.pointer{
-  position:absolute;
-  top:-25px;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:40px;
-  color:#ff00ff;
-}
-
-.center{
-  position:absolute;
-  width:120px;
-  height:120px;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  border-radius:50%;
-  overflow:hidden;
-  box-shadow:0 0 40px #ff00ff,0 0 60px #00f5ff;
-  background:#000;
-}
-
-.center img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-button{
-  padding:15px 35px;
-  font-size:18px;
-  border:none;
-  border-radius:12px;
-  background:linear-gradient(45deg,#00f5ff,#ff00ff);
-  color:black;
-  font-weight:bold;
-  cursor:pointer;
-  box-shadow:0 0 25px #00f5ff;
-}
-
-.popup{
-  position:fixed;
-  top:40%;
-  left:50%;
-  transform:translate(-50%,-50%) scale(0);
-  background:linear-gradient(45deg,#00f5ff,#ff00ff);
-  padding:25px 45px;
-  border-radius:20px;
-  font-size:22px;
-  color:black;
-  font-weight:bold;
-  box-shadow:0 0 60px #00f5ff;
-  transition:0.3s;
-  z-index:999;
-}
-</style>
-</head>
-
-<body>
-
-<h1>🎯 ИГРА НА УДАЧУ</h1>
-
-<div class="container">
-
-  <div class="pointer">▼</div>
-  <div class="wheel" id="wheel"></div>
-
-  <div class="center">
-    <img src="logo.jpg">
-  </div>
-
-</div>
-
-<button onclick="spin()">🎲 КРУТИТЬ</button>
-
-<div class="popup" id="popup"></div>
-
 <script>
+
+const API_URL = "https://script.google.com/macros/s/AKfycbwiIjBckB_YZ-m7IQ1PTMp_XThVYiSnAY19cx5E-dnlKWkJ_nreyEdone1UA7cwatp1TQ/exec";
 
 const rewards = [
   "5% СКИДКА 🎁",
   "10% СКИДКА 🎉",
-  "🚕 БЕСПЛАТНАЯ ДОСТАВКА по Токмоку (от 5 кг)",
+  "🚕 БЕСПЛАТНАЯ ДОСТАВКА (от 5 кг)",
   "🎁 1 КГ БЕСПЛАТНО",
   "😅 ПОПРОБУЙ СНОВА",
   "😅 ПОПРОБУЙ СНОВА"
 ];
 
-const colors = [
-  "#ff00ff",
-  "#00f5ff",
-  "#22c55e",
-  "#facc15",
-  "#ef4444",
-  "#8b5cf6"
-];
-
 let wheel = document.getElementById("wheel");
 let rotation = 0;
+let canSpin = true;
 
-/* создание колеса */
-function createWheel(){
-  let angle = 360 / rewards.length;
+// Telegram user
+let tg = window.Telegram?.WebApp;
+let clientCode = "";
 
-  rewards.forEach((text,i)=>{
-    let sector = document.createElement("div");
-    sector.className="sector";
-    sector.style.background = colors[i];
-    sector.style.transform = `rotate(${i*angle}deg) skewY(${90-angle}deg)`;
-
-    let label = document.createElement("span");
-    label.innerText = text;
-
-    sector.appendChild(label);
-    wheel.appendChild(sector);
-  });
+if(tg){
+  tg.expand();
+  clientCode = tg.initDataUnsafe?.user?.id;
 }
 
-createWheel();
-
-/* 🎯 ВЕСОВАЯ ЛОГИКА */
-function getWeightedIndex() {
-  const weights = [
-    20, // 10% часто
-    15, // 20% часто
-    5,  // доставка (редко)
-    3,  // 1 кг (очень редко)
-    30, // попробуй
-    27  // попробуй
-  ];
-
-  let total = weights.reduce((a,b)=>a+b,0);
-  let rand = Math.random() * total;
-
-  for(let i=0;i<weights.length;i++){
-    if(rand < weights[i]) return i;
-    rand -= weights[i];
-  }
-}
-
-/* вращение */
+/* 🎯 СПИН */
 function spin(){
+
+  if(!canSpin){
+    alert("❌ Вы уже крутили");
+    return;
+  }
 
   let index = getWeightedIndex();
   let angle = 360 / rewards.length;
@@ -210,38 +41,47 @@ function spin(){
 
   setTimeout(()=>{
     showWin(rewards[index]);
+
+    // 📡 отправка на сервер
+    saveResult(rewards[index]);
+
   },5000);
 }
 
-/* салют */
-function confetti(){
-  for(let i=0;i<120;i++){
-    let p=document.createElement("div");
-    p.style.position="fixed";
-    p.style.width="8px";
-    p.style.height="8px";
-    p.style.borderRadius="50%";
-    p.style.background=["#00f5ff","#ff00ff","#ffffff","#facc15"][Math.floor(Math.random()*4)];
-    p.style.left="50%";
-    p.style.top="50%";
+/* 📡 ОТПРАВКА В GOOGLE SHEETS */
+function saveResult(reward){
 
-    let angle=Math.random()*2*Math.PI;
-    let dist=Math.random()*400;
+  fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      client: clientCode,
+      reward: reward
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
 
-    let x=Math.cos(angle)*dist;
-    let y=Math.sin(angle)*dist;
+    if(data.status === "blocked"){
+      alert("❌ Вы уже участвовали");
+      canSpin = false;
+      return;
+    }
 
-    p.animate([
-      {transform:"translate(0,0)",opacity:1},
-      {transform:`translate(${x}px,${y}px)`,opacity:0}
-    ],{duration:1500});
+    if(data.status === "ok"){
+      canSpin = false;
+      alert("🎉 Сохранено: " + data.reward);
+    }
 
-    document.body.appendChild(p);
-    setTimeout(()=>p.remove(),1500);
-  }
+  })
+  .catch(err => {
+    console.log(err);
+  });
 }
 
-/* popup */
+/* результат */
 function showWin(text){
 
   let popup=document.getElementById("popup");
@@ -256,7 +96,4 @@ function showWin(text){
   confetti();
 }
 
-</script>
-
-</body>
-</html>
+</script>﻿
