@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Игра на удачу</title>
 
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
 <style>
 body{
   margin:0;
@@ -69,7 +71,7 @@ h1{
 
 button{
   padding:12px 25px;
-  margin:5px;
+  margin-top:20px;
   border:none;
   border-radius:10px;
   background:linear-gradient(45deg,#00f5ff,#ff00ff);
@@ -106,14 +108,20 @@ button{
   <div class="wheel" id="wheel"></div>
 </div>
 
-<!-- 👇 КЛИЕНТЫ -->
-<button onclick="spin('T1265')">Крутить T1265</button>
-<button onclick="spin('TK1564')">Крутить TK1564</button>
+<button onclick="spin()">🎲 КРУТИТЬ</button>
 
 <div class="popup" id="popup"></div>
 
 <script>
 
+/* 🔥 Telegram WebApp */
+let tg = window.Telegram.WebApp;
+tg.expand();
+
+let user = tg.initDataUnsafe.user;
+let clientCode = "TK" + user.id;
+
+/* 🎁 призы */
 const rewards = [
   "5% СКИДКА 🎁",
   "10% СКИДКА 🎉",
@@ -148,8 +156,8 @@ function createWheel(){
 
 createWheel();
 
-/* 🎯 SPIN ЧЕРЕЗ СЕРВЕР */
-function spin(clientCode){
+/* 🎯 SPIN */
+function spin(){
 
   fetch("https://script.google.com/macros/s/AKfycbw_5YpfdA9IdR0MFsylay8JoXd0W6y_2yhASoHQvChNBqgQ_F0fh5yokbz_Q3YbGtgvhQ/exec?action=spin&clientCode=" + clientCode)
 
