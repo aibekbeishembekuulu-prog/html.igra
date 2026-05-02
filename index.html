@@ -111,6 +111,12 @@ button{
   font-weight:bold;
   transition:.3s;
 }
+
+#statusText{
+  margin-top:10px;
+  opacity:0.8;
+  font-size:14px;
+}
 </style>
 </head>
 
@@ -129,14 +135,16 @@ button{
 
 <button onclick="spin()">🎲 КРУТИТЬ</button>
 
+<p id="statusText">Готов к вращению 🎯</p>
+
 <div class="popup" id="popup"></div>
 
 <script>
 let tg = window.Telegram.WebApp;
 tg.expand();
 
-/* Для теста */
-let clientCode = "T0265";
+/* 🔥 РЕАЛЬНЫЙ КЛИЕНТ ИЗ TELEGRAM */
+let clientCode = tg.initDataUnsafe?.user?.id || tg.initDataUnsafe?.user?.username || "TEST";
 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzZGEvgCgejtHfrbt7PsNBGgZPwsqNlmLa9A-jflTvX3YN7cfeXuhRYxK46WmLyNXjzkw/exec";
 
@@ -158,6 +166,7 @@ const colors = [
 
 let wheel=document.getElementById("wheel");
 let rotation=0;
+let spinning=false;
 
 /* создание колеса */
 function createWheel(){
@@ -182,6 +191,11 @@ createWheel();
 /* spin */
 async function spin(){
 
+  if(spinning) return;
+  spinning = true;
+
+  document.getElementById("statusText").innerText = "Крутим... 🎰";
+
   try{
 
     const response = await fetch(
@@ -192,28 +206,35 @@ async function spin(){
 
     if(data.status==="success"){
 
-      let index=rewards.indexOf(data.reward);
-      let angle=360/rewards.length;
+      let index = rewards.findIndex(r => r === data.reward);
+      if(index === -1) index = 0;
 
+      let angle=360/rewards.length;
       rotation += 360*6 + (360-(index*angle+angle/2));
 
       wheel.style.transform=`rotate(${rotation}deg)`;
 
       setTimeout(()=>{
         showWin(data.reward);
+        spinning = false;
+        document.getElementById("statusText").innerText = "Готов к вращению 🎯";
       },5000);
 
     }
     else if(data.status==="blocked"){
-      alert("⏳ Уже крутил сегодня!");
+      showWin("⏳ Вы уже использовали попытку. Попробуйте позже");
+      spinning = false;
+      document.getElementById("statusText").innerText = "Готов к вращению 🎯";
     }
     else{
       alert("❌ "+data.message);
+      spinning = false;
     }
 
   }catch(err){
     console.log(err);
     alert("❌ Ошибка сети");
+    spinning = false;
   }
 }
 
