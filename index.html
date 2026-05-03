@@ -140,18 +140,19 @@ button{
 <div class="popup" id="popup"></div>
 
 <script>
-let tg = window.Telegram.WebApp;
-tg.expand();
+let tg = window.Telegram?.WebApp;
 
-/* ✅ ИСПРАВЛЕННАЯ ЛОГИКА КЛИЕНТА */
+if (tg) {
+  tg.expand();
+}
+
+/* 🎯 СТАБИЛЬНЫЙ clientCode (ТОЛЬКО URL) */
 const urlParams = new URLSearchParams(window.location.search);
+let clientCode = urlParams.get("clientCode") || "";
 
-let clientCode = "";
-
-if (tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
-  clientCode = tg.initDataUnsafe.start_param;
-} else if (urlParams.get("clientCode")) {
-  clientCode = urlParams.get("clientCode");
+/* ❌ ЗАЩИТА */
+if (!clientCode) {
+  console.log("NO CLIENT CODE");
 }
 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbycEW90ffrKLbRT2G5HKPCbWY3gzqderCT-6cDxrdIxwGNUxcwDlXLiq8e1hvyuuIVatQ/exec";
@@ -164,13 +165,7 @@ const rewards = [
   "😅 ПОПРОБУЙ СНОВА"
 ];
 
-const colors = [
-  "#ff00ff",
-  "#00f5ff",
-  "#22c55e",
-  "#facc15",
-  "#ef4444"
-];
+const colors = ["#ff00ff","#00f5ff","#22c55e","#facc15","#ef4444"];
 
 let wheel=document.getElementById("wheel");
 let rotation=0;
@@ -196,7 +191,7 @@ function createWheel(){
 
 createWheel();
 
-/* spin */
+/* 🎰 spin */
 async function spin(){
 
   if(spinning) return;
@@ -204,17 +199,23 @@ async function spin(){
 
   document.getElementById("statusText").innerText = "Крутим... 🎰";
 
+  /* ❌ защита */
+  if(!clientCode){
+    alert("❌ Нет clientCode");
+    spinning = false;
+    return;
+  }
+
   try{
 
-    const response = await fetch(
-      `${SCRIPT_URL}?action=spin&clientCode=${clientCode}`
-    );
+    const url = `${SCRIPT_URL}?action=spin&clientCode=${encodeURIComponent(clientCode)}`;
 
+    const response = await fetch(url);
     const data = await response.json();
 
     if(data.status==="success"){
 
-      let index = rewards.findIndex(r => r === data.reward);
+      let index = rewards.findIndex(r => r.trim() === data.reward.trim());
       if(index === -1) index = 0;
 
       let angle=360/rewards.length;
@@ -230,7 +231,7 @@ async function spin(){
 
     }
     else if(data.status==="blocked"){
-      showWin("⏳ Вы уже использовали попытку");
+      showWin("⏳ Уже использовано");
       spinning = false;
     }
     else{
