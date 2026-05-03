@@ -135,8 +135,12 @@ button{
 let tg = window.Telegram.WebApp;
 tg.expand();
 
-/* Для теста */
-let clientCode = "T0265";
+/* 🔥 ИСПРАВЛЕНО: уникальный clientCode */
+let user = tg.initDataUnsafe?.user;
+
+let clientCode = user?.username
+  ? user.username.toUpperCase()
+  : ("T" + user?.id || "T0265");
 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCuqi_t3JRCZNns8aTWnM1GCvyNXk-F1Wzgd9nBAWvvXP5_sjRMz-exxVGzjm1KYiOPw/exec";
 
@@ -167,6 +171,7 @@ function createWheel(){
     let sector=document.createElement("div");
     sector.className="sector";
     sector.style.background=colors[i];
+
     sector.style.transform=`rotate(${i*angle}deg) skewY(${90-angle}deg)`;
 
     let label=document.createElement("span");
@@ -184,16 +189,22 @@ async function spin(){
 
   try{
 
-    const response = await fetch(
-      `${SCRIPT_URL}?action=spin&clientCode=${clientCode}`
-    );
+    const url = `${SCRIPT_URL}?action=spin&clientCode=${encodeURIComponent(clientCode)}`;
+
+    const response = await fetch(url);
 
     const data = await response.json();
 
     if(data.status==="success"){
 
-      let index=rewards.indexOf(data.reward);
-      let angle=360/rewards.length;
+      let index = rewards.indexOf(data.reward);
+
+      if(index === -1){
+        alert("❌ Reward не совпадает с колесом: " + data.reward);
+        return;
+      }
+
+      let angle = 360 / rewards.length;
 
       rotation += 360*6 + (360-(index*angle+angle/2));
 
@@ -208,7 +219,7 @@ async function spin(){
       alert("⏳ Уже крутил сегодня!");
     }
     else{
-      alert("❌ "+data.message);
+      alert("❌ "+(data.message || "Ошибка"));
     }
 
   }catch(err){
