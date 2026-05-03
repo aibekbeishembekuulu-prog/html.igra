@@ -143,8 +143,13 @@ button{
 let tg = window.Telegram.WebApp;
 tg.expand();
 
-/* 🔥 РЕАЛЬНЫЙ КЛИЕНТ ИЗ TELEGRAM */
-let clientCode = tg.initDataUnsafe?.user?.id || tg.initDataUnsafe?.user?.username || "TEST";
+/* ✅ ИСПРАВЛЕННАЯ ЛОГИКА КЛИЕНТА */
+const urlParams = new URLSearchParams(window.location.search);
+
+let clientCode =
+  tg.initDataUnsafe?.start_param ||
+  urlParams.get("clientCode") ||
+  "TEST";
 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbycEW90ffrKLbRT2G5HKPCbWY3gzqderCT-6cDxrdIxwGNUxcwDlXLiq8e1hvyuuIVatQ/exec";
 
@@ -222,9 +227,8 @@ async function spin(){
 
     }
     else if(data.status==="blocked"){
-      showWin("⏳ Вы уже использовали попытку. Попробуйте позже");
+      showWin("⏳ Вы уже использовали попытку");
       spinning = false;
-      document.getElementById("statusText").innerText = "Готов к вращению 🎯";
     }
     else{
       alert("❌ "+data.message);
