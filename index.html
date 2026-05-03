@@ -66,7 +66,6 @@ h1{
   transform:translateX(-50%);
   font-size:40px;
   color:#ff00ff;
-  z-index:20;
 }
 
 .center-logo{
@@ -78,7 +77,6 @@ h1{
   height:90px;
   border-radius:50%;
   background:white;
-  z-index:10;
   overflow:hidden;
 }
 
@@ -141,17 +139,20 @@ button{
 
 <script>
 let tg = window.Telegram?.WebApp;
+if (tg) tg.expand();
 
-if (tg) {
-  tg.expand();
+/* 🔥 clientCode FIX (Telegram + URL fallback) */
+let urlParams = new URLSearchParams(window.location.search);
+let clientCode = urlParams.get("clientCode");
+
+/* если нет в URL → берём из Telegram */
+if (!clientCode && tg?.initDataUnsafe?.user?.id) {
+  clientCode = "TG_" + tg.initDataUnsafe.user.id;
 }
 
-/* 🎯 СТАБИЛЬНЫЙ clientCode (ТОЛЬКО URL) */
-const urlParams = new URLSearchParams(window.location.search);
-let clientCode = urlParams.get("clientCode") || "";
-
-/* ❌ ЗАЩИТА */
+/* если вообще нет */
 if (!clientCode) {
+  document.getElementById("statusText").innerText = "❌ clientCode не найден";
   console.log("NO CLIENT CODE");
 }
 
@@ -171,7 +172,7 @@ let wheel=document.getElementById("wheel");
 let rotation=0;
 let spinning=false;
 
-/* создание колеса */
+/* колесо */
 function createWheel(){
   let angle=360/rewards.length;
 
@@ -191,20 +192,19 @@ function createWheel(){
 
 createWheel();
 
-/* 🎰 spin */
+/* spin */
 async function spin(){
 
   if(spinning) return;
   spinning = true;
 
-  document.getElementById("statusText").innerText = "Крутим... 🎰";
-
-  /* ❌ защита */
   if(!clientCode){
     alert("❌ Нет clientCode");
     spinning = false;
     return;
   }
+
+  document.getElementById("statusText").innerText = "Крутим... 🎰";
 
   try{
 
