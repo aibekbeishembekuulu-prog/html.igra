@@ -136,7 +136,12 @@ let tg = window.Telegram.WebApp;
 tg.expand();
 
 /* Для теста */
-let clientCode = "T0265";
+let tg = window.Telegram.WebApp;
+tg.expand();
+
+const startData = tg.initDataUnsafe?.start_param;
+
+let clientCode = startData || "";
 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyp9lmk-Yl61HLkChY83v7yb1q-JwcO6Qfmi419OxdnCSiGQOjxmjcghXX4vE-NTBfoeg/exec";
 
