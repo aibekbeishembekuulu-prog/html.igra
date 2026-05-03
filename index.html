@@ -146,10 +146,13 @@ tg.expand();
 /* ✅ ИСПРАВЛЕННАЯ ЛОГИКА КЛИЕНТА */
 const urlParams = new URLSearchParams(window.location.search);
 
-let clientCode =
-  tg.initDataUnsafe?.start_param ||
-  urlParams.get("clientCode") ||
-  "TEST";
+let clientCode = "";
+
+if (tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
+  clientCode = tg.initDataUnsafe.start_param;
+} else if (urlParams.get("clientCode")) {
+  clientCode = urlParams.get("clientCode");
+}
 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbycEW90ffrKLbRT2G5HKPCbWY3gzqderCT-6cDxrdIxwGNUxcwDlXLiq8e1hvyuuIVatQ/exec";
 
