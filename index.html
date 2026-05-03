@@ -66,6 +66,7 @@ h1{
   transform:translateX(-50%);
   font-size:40px;
   color:#ff00ff;
+  z-index:20;
 }
 
 .center-logo{
@@ -77,6 +78,7 @@ h1{
   height:90px;
   border-radius:50%;
   background:white;
+  z-index:10;
   overflow:hidden;
 }
 
@@ -109,12 +111,6 @@ button{
   font-weight:bold;
   transition:.3s;
 }
-
-#statusText{
-  margin-top:10px;
-  opacity:0.8;
-  font-size:14px;
-}
 </style>
 </head>
 
@@ -133,30 +129,16 @@ button{
 
 <button onclick="spin()">🎲 КРУТИТЬ</button>
 
-<p id="statusText">Готов к вращению 🎯</p>
-
 <div class="popup" id="popup"></div>
 
 <script>
-let tg = window.Telegram?.WebApp;
-if (tg) tg.expand();
+let tg = window.Telegram.WebApp;
+tg.expand();
 
-/* 🔥 clientCode FIX (Telegram + URL fallback) */
-let urlParams = new URLSearchParams(window.location.search);
-let clientCode = urlParams.get("clientCode");
+/* тестовый клиент */
+let clientCode = "T0265";
 
-/* если нет в URL → берём из Telegram */
-if (!clientCode && tg?.initDataUnsafe?.user?.id) {
-  clientCode = "TG_" + tg.initDataUnsafe.user.id;
-}
-
-/* если вообще нет */
-if (!clientCode) {
-  document.getElementById("statusText").innerText = "❌ clientCode не найден";
-  console.log("NO CLIENT CODE");
-}
-
-const SCRIPT_URL ="https://script.google.com/macros/s/AKfycbz7QCVQ5rebR2TIoprNsKG3zYgSdKPdK_9J9qYGvz-qA6XqO2DFORSzqUNsoPS2hNXmHQ/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyV5k_taEQdqO6MiFpxADcnSY910GlLV5CCHBD7nPWhizN9xZtbI-VUgxUiSm2uuLCgqg/exec";
 
 const rewards = [
   "🎁 СКИДКА 5%",
@@ -166,13 +148,17 @@ const rewards = [
   "😅 ПОПРОБУЙ СНОВА"
 ];
 
-const colors = ["#ff00ff","#00f5ff","#22c55e","#facc15","#ef4444"];
+const colors = [
+  "#ff00ff",
+  "#00f5ff",
+  "#22c55e",
+  "#facc15",
+  "#ef4444"
+];
 
 let wheel=document.getElementById("wheel");
 let rotation=0;
-let spinning=false;
 
-/* колесо */
 function createWheel(){
   let angle=360/rewards.length;
 
@@ -192,61 +178,43 @@ function createWheel(){
 
 createWheel();
 
-/* spin */
 async function spin(){
-
-  if(spinning) return;
-  spinning = true;
-
-  if(!clientCode){
-    alert("❌ Нет clientCode");
-    spinning = false;
-    return;
-  }
-
-  document.getElementById("statusText").innerText = "Крутим... 🎰";
 
   try{
 
-    const url = `${SCRIPT_URL}?action=spin&clientCode=${encodeURIComponent(clientCode)}`;
+    const response = await fetch(
+      `${SCRIPT_URL}?action=spin&clientCode=${clientCode}`
+    );
 
-    const response = await fetch(url);
     const data = await response.json();
 
     if(data.status==="success"){
 
-      let index = rewards.findIndex(r => r.trim() === data.reward.trim());
-      if(index === -1) index = 0;
-
+      let index=rewards.indexOf(data.reward);
       let angle=360/rewards.length;
+
       rotation += 360*6 + (360-(index*angle+angle/2));
 
       wheel.style.transform=`rotate(${rotation}deg)`;
 
       setTimeout(()=>{
         showWin(data.reward);
-        spinning = false;
-        document.getElementById("statusText").innerText = "Готов к вращению 🎯";
       },5000);
 
     }
     else if(data.status==="blocked"){
-      showWin("⏳ Уже использовано");
-      spinning = false;
+      alert("⏳ Рулетка доступна 1 раз в 7 дней");
     }
     else{
       alert("❌ "+data.message);
-      spinning = false;
     }
 
   }catch(err){
     console.log(err);
     alert("❌ Ошибка сети");
-    spinning = false;
   }
 }
 
-/* popup */
 function showWin(text){
   let popup=document.getElementById("popup");
 
