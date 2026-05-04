@@ -137,19 +137,19 @@ button{
 let tg = window.Telegram.WebApp;
 tg.expand();
 
-let user = tg.initDataUnsafe?.user || {};
-let clientCode = "T0265";
+/* 🔥 ГЛАВНОЕ ИСПРАВЛЕНИЕ */
+const urlParams = new URLSearchParams(window.location.search);
+let clientCode = urlParams.get("client");
 
-/* Определение client code */
-if (user.username && user.username.trim()) {
-  clientCode = user.username.trim().toUpperCase();
-} else if (user.id) {
-  clientCode = "T" + user.id;
+if(!clientCode){
+  clientCode = tg.initDataUnsafe?.user?.id;
 }
 
-console.log("CLIENT:", clientCode);
+clientCode = String(clientCode || "").trim().toUpperCase();
 
-/* ТВОЙ РАБОЧИЙ APPS SCRIPT */
+console.log("CLIENT CODE:", clientCode);
+
+/* GOOGLE SCRIPT */
 const SCRIPT_URL ="https://script.google.com/macros/s/AKfycbx5xSN2eMBuWXXNom5h1lIhYYJV8wO0UkBrK_RWZgSN7Le_WQkG9K-RKxLcqSpWb1Ov4A/exec";
 
 const rewards = [
@@ -171,7 +171,7 @@ const colors = [
 let wheel = document.getElementById("wheel");
 let rotation = 0;
 
-/* Создание колеса */
+/* создание колеса */
 function createWheel(){
   let angle = 360 / rewards.length;
 
@@ -191,7 +191,7 @@ function createWheel(){
 
 createWheel();
 
-/* Запуск рулетки */
+/* spin */
 async function spin(){
 
   try{
@@ -220,24 +220,21 @@ async function spin(){
       },5000);
 
     }
-
     else if(data.status === "blocked"){
       alert(`⏳ Уже крутили\nСледующая попытка через ${data.daysLeft} дн.`);
     }
-
     else{
       alert("❌ " + (data.message || "Ошибка"));
     }
 
   }
-
   catch(err){
     console.log(err);
     alert("❌ Ошибка сети");
   }
 }
 
-/* Popup */
+/* popup */
 function showWin(text){
   let popup = document.getElementById("popup");
 
