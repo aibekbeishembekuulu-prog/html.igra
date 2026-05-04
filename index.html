@@ -57,7 +57,6 @@ h1{
   top:30px;
   font-size:12px;
   font-weight:bold;
-  color:#fff;
 }
 
 .pointer{
@@ -111,7 +110,6 @@ button{
   font-size:22px;
   font-weight:bold;
   transition:.3s;
-  z-index:100;
 }
 </style>
 </head>
@@ -125,7 +123,7 @@ button{
   <div class="wheel" id="wheel"></div>
 
   <div class="center-logo">
-    <img src="logo.jpg" alt="logo">
+    <img src="logo.jpg">
   </div>
 </div>
 
@@ -137,27 +135,17 @@ button{
 let tg = window.Telegram.WebApp;
 tg.expand();
 
-/* 🔥 ГЛАВНОЕ ИСПРАВЛЕНИЕ */
-const urlParams = new URLSearchParams(window.location.search);
-let clientCode = urlParams.get("client");
+/* Для теста */
+let clientCode = "T0265";
 
-if(!clientCode){
-  clientCode = tg.initDataUnsafe?.user?.id;
-}
-
-clientCode = String(clientCode || "").trim().toUpperCase();
-
-console.log("CLIENT CODE:", clientCode);
-
-/* GOOGLE SCRIPT */
-const SCRIPT_URL ="https://script.google.com/macros/s/AKfycbx5xSN2eMBuWXXNom5h1lIhYYJV8wO0UkBrK_RWZgSN7Le_WQkG9K-RKxLcqSpWb1Ov4A/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHju8jQstbup9qgn3tXQodBBJFTm0NNNorV33XePq-_x8CDv10s8YlAnu7a4630qJj6A/exec";
 
 const rewards = [
   "🎁 СКИДКА 5%",
   "🎉 СКИДКА 10%",
   "🔥 СКИДКА 12%",
   "💎 СКИДКА 15%",
-  "😅 ПОПРОБУЙ СЛЕДУЮЩИЙ РАЗ"
+  "😅 ПОПРОБУЙ СНОВА"
 ];
 
 const colors = [
@@ -168,21 +156,21 @@ const colors = [
   "#ef4444"
 ];
 
-let wheel = document.getElementById("wheel");
-let rotation = 0;
+let wheel=document.getElementById("wheel");
+let rotation=0;
 
 /* создание колеса */
 function createWheel(){
-  let angle = 360 / rewards.length;
+  let angle=360/rewards.length;
 
   rewards.forEach((text,i)=>{
-    let sector = document.createElement("div");
-    sector.className = "sector";
-    sector.style.background = colors[i];
-    sector.style.transform = `rotate(${i*angle}deg) skewY(${90-angle}deg)`;
+    let sector=document.createElement("div");
+    sector.className="sector";
+    sector.style.background=colors[i];
+    sector.style.transform=`rotate(${i*angle}deg) skewY(${90-angle}deg)`;
 
-    let label = document.createElement("span");
-    label.innerText = text;
+    let label=document.createElement("span");
+    label.innerText=text;
 
     sector.appendChild(label);
     wheel.appendChild(sector);
@@ -197,38 +185,33 @@ async function spin(){
   try{
 
     const response = await fetch(
-      `${SCRIPT_URL}?action=spin&clientCode=${encodeURIComponent(clientCode)}`
+      `${SCRIPT_URL}?action=spin&clientCode=${clientCode}`
     );
 
     const data = await response.json();
 
-    console.log(data);
+    if(data.status==="success"){
 
-    if(data.status === "success"){
-
-      let index = rewards.indexOf(data.reward);
-      if(index < 0) index = 0;
-
-      let angle = 360 / rewards.length;
+      let index=rewards.indexOf(data.reward);
+      let angle=360/rewards.length;
 
       rotation += 360*6 + (360-(index*angle+angle/2));
 
-      wheel.style.transform = `rotate(${rotation}deg)`;
+      wheel.style.transform=`rotate(${rotation}deg)`;
 
       setTimeout(()=>{
         showWin(data.reward);
       },5000);
 
     }
-    else if(data.status === "blocked"){
-      alert(`⏳ Уже крутили\nСледующая попытка через ${data.daysLeft} дн.`);
+    else if(data.status==="blocked"){
+      alert("⏳ Уже крутил сегодня!");
     }
     else{
-      alert("❌ " + (data.message || "Ошибка"));
+      alert("❌ "+data.message);
     }
 
-  }
-  catch(err){
+  }catch(err){
     console.log(err);
     alert("❌ Ошибка сети");
   }
@@ -236,17 +219,16 @@ async function spin(){
 
 /* popup */
 function showWin(text){
-  let popup = document.getElementById("popup");
+  let popup=document.getElementById("popup");
 
-  popup.innerHTML = "🎉 " + text;
-  popup.style.transform = "translate(-50%,-50%) scale(1)";
+  popup.innerHTML="🎉 "+text;
+  popup.style.transform="translate(-50%,-50%) scale(1)";
 
   setTimeout(()=>{
-    popup.style.transform = "translate(-50%,-50%) scale(0)";
-  },3000);
+    popup.style.transform="translate(-50%,-50%) scale(0)";
+  },2500);
 }
 </script>
 
 </body>
 </html>
-  
