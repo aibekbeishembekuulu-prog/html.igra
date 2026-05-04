@@ -135,8 +135,10 @@ button{
 let tg = window.Telegram.WebApp;
 tg.expand();
 
+/* ✅ ТВОЙ TELEGRAM ID */
+let telegram_id = tg.initDataUnsafe?.user?.id;
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7iDIAQ5gdo7phDAaM7P1Qx58Y6_8J23LUInRLmWU6de20JXhFXMhUpwJ4RuTtx4G8dg/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby55laKyxXWC6ND7ksC_eQUE253v4H-bsvyHQsibseXqH4_WBg4HSqaOnkfear0eZX7BQ/exec";
 
 const rewards = [
   "🎁 СКИДКА 5%",
@@ -154,12 +156,12 @@ const colors = [
   "#ef4444"
 ];
 
-let wheel=document.getElementById("wheel");
-let rotation=0;
+let wheel = document.getElementById("wheel");
+let rotation = 0;
 
 /* создание колеса */
 function createWheel(){
-  let angle=360/rewards.length;
+  let angle = 360 / rewards.length;
 
   rewards.forEach((text,i)=>{
     let sector=document.createElement("div");
@@ -177,25 +179,30 @@ function createWheel(){
 
 createWheel();
 
-/* spin */
+/* 🎰 spin */
 async function spin(){
+
+  if(!telegram_id){
+    alert("❌ Ошибка Telegram WebApp");
+    return;
+  }
 
   try{
 
     const response = await fetch(
-      `${SCRIPT_URL}?action=spin&clientCode=${clientCode}`
+      `${SCRIPT_URL}?action=spin&telegram_id=${telegram_id}`
     );
 
     const data = await response.json();
 
     if(data.status==="success"){
 
-      let index=rewards.indexOf(data.reward);
-      let angle=360/rewards.length;
+      let index = rewards.indexOf(data.reward);
+      let angle = 360 / rewards.length;
 
       rotation += 360*6 + (360-(index*angle+angle/2));
 
-      wheel.style.transform=`rotate(${rotation}deg)`;
+      wheel.style.transform = `rotate(${rotation}deg)`;
 
       setTimeout(()=>{
         showWin(data.reward);
@@ -203,7 +210,7 @@ async function spin(){
 
     }
     else if(data.status==="blocked"){
-      alert("⏳ Уже крутил сегодня!");
+      alert("⏳ Можно крутить 1 раз в неделю!");
     }
     else{
       alert("❌ "+data.message);
@@ -215,16 +222,21 @@ async function spin(){
   }
 }
 
-/* popup */
+/* 🎉 popup */
 function showWin(text){
+
   let popup=document.getElementById("popup");
 
-  popup.innerHTML="🎉 "+text;
+  popup.innerHTML =
+    "🎉 ПОЗДРАВЛЯЕМ!<br><br>" +
+    "🏆 " + text + "<br><br>" +
+    "⏳ Следующая попытка через 7 дней";
+
   popup.style.transform="translate(-50%,-50%) scale(1)";
 
   setTimeout(()=>{
     popup.style.transform="translate(-50%,-50%) scale(0)";
-  },2500);
+  },3000);
 }
 </script>
 
