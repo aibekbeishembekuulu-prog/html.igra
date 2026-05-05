@@ -216,10 +216,11 @@ function showWin(text){
   let popup=document.getElementById("popup");
 
   popup.innerHTML =
-    "🎉 ПОЗДРАВЛЯЕМ!<br><br>" +
-    "🏆 " + text + "<br><br>" +
-    "⏳ Следующая попытка через 7 дней";
-
+  "🎉 ПОЗДРАВЛЯЕМ!<br><br>" +
+  "🎯 Вы крутили рулетку<br><br>" +
+  "🏆 Ваш приз: " + text + "<br><br>" +
+  "📦 Используй при получении товара<br><br>" +
+  "⏳ Следующая попытка через 7 дней";
   popup.style.transform="translate(-50%,-50%) scale(1)";
 
   setTimeout(()=>{
