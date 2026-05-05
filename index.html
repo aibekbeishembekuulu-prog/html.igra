@@ -100,15 +100,16 @@ button{
   cursor:pointer;
 }
 
+/* 👇 ВЫВОД НИЖЕ ЛОГО */
 .popup{
   position:fixed;
-  top:50%;
+  top:75%;
   left:50%;
   transform:translate(-50%,-50%) scale(0);
   background:linear-gradient(45deg,#00f5ff,#ff00ff);
-  padding:25px 40px;
+  padding:20px 30px;
   border-radius:18px;
-  font-size:22px;
+  font-size:20px;
   font-weight:bold;
   transition:.3s;
   z-index:9999;
@@ -141,7 +142,7 @@ let telegram_id = tg.initDataUnsafe?.user?.id;
 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby55laKyxXWC6ND7ksC_eQUE253v4H-bsvyHQsibseXqH4_WBg4HSqaOnkfear0eZX7BQ/exec";
 
-/* 🔥 ЕДИНЫЙ СПИСОК (ДОЛЖЕН СОВПАДАТЬ С GAS) */
+/* 🔥 ЕДИНЫЙ СПИСОК */
 const rewards = [
   "😅 ПОПРОБУЙ В СЛЕДУЮЩИЙ РАЗ",
   "🎁 СКИДКА 5%",
@@ -163,7 +164,7 @@ const colors = [
 let wheel = document.getElementById("wheel");
 let rotation = 0;
 
-/* 🎡 создание колеса */
+/* 🎡 колесо */
 function createWheel(){
   let angle = 360 / rewards.length;
 
@@ -201,11 +202,10 @@ async function spin(){
 
     if(data.status==="success"){
 
-      let index = rewards.indexOf(data.reward);
+      let index = data.rewardIndex;
 
-      if(index === -1){
-        alert("⚠️ Ошибка синхронизации наград");
-        console.log("SERVER:", data.reward);
+      if(index === undefined || index < 0){
+        alert("⚠️ Ошибка данных сервера");
         return;
       }
 
@@ -217,7 +217,7 @@ async function spin(){
       wheel.style.transform = `rotate(${rotation}deg)`;
 
       setTimeout(()=>{
-        showWin(data.reward);
+        showWin(rewards[index]);
       },6000);
 
     }
