@@ -2,147 +2,98 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TEZ KARGO Рулетка</title>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
 <style>
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:radial-gradient(circle at top,#0f172a,#020617);
-  text-align:center;
-  color:white;
-  overflow:hidden;
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #1e293b, #0f172a);
+  font-family: Arial;
+  text-align: center;
+  color: white;
 }
 
-h1{
-  margin-top:20px;
-  color:#00f5ff;
-  text-shadow:0 0 20px #00f5ff;
+.container {
+  margin-top: 50px;
+  position: relative;
 }
 
-.container{
-  position:relative;
-  width:360px;
-  height:360px;
-  margin:40px auto;
+.pointer {
+  width: 0;
+  height: 0;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-bottom: 30px solid #facc15;
+  margin: 0 auto;
+  z-index: 10;
 }
 
-.wheel{
-  width:100%;
-  height:100%;
-  border-radius:50%;
-  overflow:hidden;
-  position:relative;
-  border:12px solid #00f5ff;
-  box-shadow:0 0 35px #00f5ff;
-  transition:transform 6s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-  will-change: transform;
+#wheel {
+  width: 320px;
+  height: 320px;
+  margin: -10px auto 20px;
+  border-radius: 50%;
+  border: 10px solid #fff;
+  transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+
+  background: conic-gradient(
+    #ef4444 0deg 60deg,
+    #22c55e 60deg 120deg,
+    #3b82f6 120deg 180deg,
+    #f97316 180deg 240deg,
+    #a855f7 240deg 300deg,
+    #eab308 300deg 360deg
+  );
 }
 
-.sector{
-  position:absolute;
-  width:50%;
-  height:50%;
-  top:50%;
-  left:50%;
-  transform-origin:0% 0%;
-  clip-path:polygon(0 0,100% 0,100% 100%);
+button {
+  padding: 12px 25px;
+  font-size: 18px;
+  border: none;
+  border-radius: 10px;
+  background: #22c55e;
+  color: white;
+  cursor: pointer;
+  margin-top: 15px;
 }
 
-.sector span{
-  position:absolute;
-  left:18px;
-  top:30px;
-  font-size:11px;
-  font-weight:bold;
+#result {
+  margin-top: 20px;
+  font-size: 22px;
 }
 
-.pointer{
-  position:absolute;
-  top:-25px;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:40px;
-  color:#ff00ff;
-  z-index:20;
-}
-
-.center-logo{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  width:90px;
-  height:90px;
-  border-radius:50%;
-  background:white;
-  z-index:10;
-  overflow:hidden;
-}
-
-.center-logo img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-button{
-  padding:14px 30px;
-  border:none;
-  border-radius:12px;
-  background:linear-gradient(45deg,#00f5ff,#ff00ff);
-  color:white;
-  font-size:16px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-/* 👇 ВЫВОД НИЖЕ ЛОГО */
-.popup{
-  position:fixed;
-  top:75%;
-  left:50%;
-  transform:translate(-50%,-50%) scale(0);
-  background:linear-gradient(45deg,#00f5ff,#ff00ff);
-  padding:20px 30px;
-  border-radius:18px;
-  font-size:20px;
-  font-weight:bold;
-  transition:.3s;
-  z-index:9999;
+input {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  margin-bottom: 10px;
+  width: 200px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🎯 TEZ KARGO РУЛЕТКА</h1>
+<h2>🎰 TEZ KARGO Рулетка</h2>
 
 <div class="container">
-  <div class="pointer">▼</div>
-  <div class="wheel" id="wheel"></div>
-
-  <div class="center-logo">
-    <img src="logo.jpg">
-  </div>
+  <div class="pointer"></div>
+  <div id="wheel"></div>
 </div>
 
-<button onclick="spin()">🎲 КРУТИТЬ</button>
+<!-- telegram id ввод -->
+<input id="tgid" placeholder="Telegram ID">
 
-<div class="popup" id="popup"></div>
+<br>
+
+<button onclick="spin()">Крутить</button>
+
+<div id="result"></div>
 
 <script>
-let tg = window.Telegram.WebApp;
-tg.expand();
 
-let telegram_id = tg.initDataUnsafe?.user?.id;
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxT-7zGTiEFVjpJ9z8Lu5K1pmosYMhUGvcQOn3pLkBJBWvflLZ0DInDkn4X17DxPu8vGw/exec";
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJQEqIWAXDDyPZ18_3TMWxsFBvoUdFQwFBMi5vW-SK299Y9xcQPXDAO9qQR2APak4Q/exec";
-
-/* 🔥 ЕДИНЫЙ СПИСОК */
 const rewards = [
   "😅 ПОПРОБУЙ В СЛЕДУЮЩИЙ РАЗ",
   "🎁 СКИДКА 5%",
@@ -152,104 +103,60 @@ const rewards = [
   "💎 СКИДКА 15%"
 ];
 
-const colors = [
-  "#ef4444",
-  "#00f5ff",
-  "#22c55e",
-  "#3b82f6",
-  "#facc15",
-  "#ff00ff"
-];
+let isSpinning = false;
 
-let wheel = document.getElementById("wheel");
-let rotation = 0;
+function spin() {
 
-/* 🎡 колесо */
-function createWheel(){
-  let angle = 360 / rewards.length;
+  if (isSpinning) return;
+  isSpinning = true;
 
-  rewards.forEach((text,i)=>{
-    let sector=document.createElement("div");
-    sector.className="sector";
-    sector.style.background=colors[i];
-    sector.style.transform=`rotate(${i*angle}deg) skewY(${90-angle}deg)`;
+  let telegram_id = document.getElementById("tgid").value;
 
-    let label=document.createElement("span");
-    label.innerText=text;
-
-    sector.appendChild(label);
-    wheel.appendChild(sector);
-  });
-}
-
-createWheel();
-
-/* 🎰 spin */
-async function spin(){
-
-  if(!telegram_id){
-    alert("❌ Telegram error");
+  if (!telegram_id) {
+    alert("Введите Telegram ID");
+    isSpinning = false;
     return;
   }
 
-  try{
+  fetch(SCRIPT_URL + "?action=spin&telegram_id=" + telegram_id)
+    .then(res => res.json())
+    .then(data => {
 
-    const response = await fetch(
-      `${SCRIPT_URL}?action=spin&telegram_id=${telegram_id}`
-    );
-
-    const data = await response.json();
-
-    if(data.status==="success"){
-
-      let index = data.rewardIndex;
-
-      if(index === undefined || index < 0){
-        alert("⚠️ Ошибка данных сервера");
+      if (data.status !== "success") {
+        document.getElementById("result").innerHTML =
+          "⛔ " + data.message;
+        isSpinning = false;
         return;
       }
 
-      let angle = 360 / rewards.length;
-      let extraSpins = 6 + Math.floor(Math.random()*4);
+      let index = data.rewardIndex;
+      let reward = data.reward;
 
-      rotation += 360 * extraSpins + (360 - (index * angle + angle/2));
+      spinWheel(index);
 
-      wheel.style.transform = `rotate(${rotation}deg)`;
+      setTimeout(() => {
+        document.getElementById("result").innerHTML =
+          "🎉 Вы выиграли: <b>" + reward + "</b>";
 
-      setTimeout(()=>{
-        showWin(rewards[index]);
-      },6000);
+        isSpinning = false;
+      }, 4200);
 
-    }
-    else if(data.status==="blocked"){
-      alert("⏳ Можно крутить 1 раз в неделю!");
-    }
-    else{
-      alert("❌ "+data.message);
-    }
-
-  }catch(err){
-    console.log(err);
-    alert("❌ Ошибка сети");
-  }
+    })
+    .catch(err => {
+      console.log(err);
+      isSpinning = false;
+    });
 }
 
-/* 🎉 popup */
-function showWin(text){
+function spinWheel(index) {
 
-  let popup=document.getElementById("popup");
+  const angle = 360 / rewards.length;
+  const rotateTo = (360 * 6) + (index * angle);
 
-  popup.innerHTML =
-    "🎉 ПОЗДРАВЛЯЕМ!<br><br>" +
-    "🏆 " + text + "<br><br>" +
-    "⏳ Следующая попытка через 7 дней";
-
-  popup.style.transform="translate(-50%,-50%) scale(1)";
-
-  setTimeout(()=>{
-    popup.style.transform="translate(-50%,-50%) scale(0)";
-  },3000);
+  document.getElementById("wheel").style.transform =
+    `rotate(${rotateTo}deg)`;
 }
+
 </script>
 
 </body>
