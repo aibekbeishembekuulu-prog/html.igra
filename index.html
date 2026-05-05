@@ -55,7 +55,7 @@ h1{
   position:absolute;
   left:18px;
   top:30px;
-  font-size:12px;
+  font-size:11px;
   font-weight:bold;
 }
 
@@ -135,31 +135,31 @@ button{
 let tg = window.Telegram.WebApp;
 tg.expand();
 
-/* ✅ ТВОЙ TELEGRAM ID */
 let telegram_id = tg.initDataUnsafe?.user?.id;
 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby55laKyxXWC6ND7ksC_eQUE253v4H-bsvyHQsibseXqH4_WBg4HSqaOnkfear0eZX7BQ/exec";
 
 const rewards = [
+  "😅 ПОПРОБУЙ В СЛЕДУЮЩИЙ РАЗ",
   "🎁 СКИДКА 5%",
+  "✨ СКИДКА 7%",
   "🎉 СКИДКА 10%",
   "🔥 СКИДКА 12%",
-  "💎 СКИДКА 15%",
-  "😅 ПОПРОБУЙ СНОВА"
+  "💎 СКИДКА 15%"
 ];
 
 const colors = [
-  "#ff00ff",
+  "#ef4444",
   "#00f5ff",
   "#22c55e",
+  "#3b82f6",
   "#facc15",
-  "#ef4444"
+  "#ff00ff"
 ];
 
 let wheel = document.getElementById("wheel");
 let rotation = 0;
 
-/* создание колеса */
 function createWheel(){
   let angle = 360 / rewards.length;
 
@@ -179,7 +179,6 @@ function createWheel(){
 
 createWheel();
 
-/* 🎰 spin */
 async function spin(){
 
   if(!telegram_id){
@@ -198,6 +197,12 @@ async function spin(){
     if(data.status==="success"){
 
       let index = rewards.indexOf(data.reward);
+
+      if(index === -1){
+        alert("Ошибка синхронизации наград");
+        return;
+      }
+
       let angle = 360 / rewards.length;
 
       rotation += 360*6 + (360-(index*angle+angle/2));
@@ -210,7 +215,7 @@ async function spin(){
 
     }
     else if(data.status==="blocked"){
-      alert("⏳ Можно крутить 1 раз в неделю!");
+      alert("⏳ Можно крутить только 1 раз в неделю!");
     }
     else{
       alert("❌ "+data.message);
@@ -222,7 +227,6 @@ async function spin(){
   }
 }
 
-/* 🎉 popup */
 function showWin(text){
 
   let popup=document.getElementById("popup");
