@@ -38,7 +38,8 @@ h1{
   position:relative;
   border:12px solid #00f5ff;
   box-shadow:0 0 35px #00f5ff;
-  transition:transform 5s cubic-bezier(.2,.8,.2,1);
+  transition:transform 6s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+  will-change: transform;
 }
 
 .sector{
@@ -101,7 +102,7 @@ button{
 
 .popup{
   position:fixed;
-  top:45%;
+  top:50%;
   left:50%;
   transform:translate(-50%,-50%) scale(0);
   background:linear-gradient(45deg,#00f5ff,#ff00ff);
@@ -110,6 +111,7 @@ button{
   font-size:22px;
   font-weight:bold;
   transition:.3s;
+  z-index:9999;
 }
 </style>
 </head>
@@ -139,6 +141,7 @@ let telegram_id = tg.initDataUnsafe?.user?.id;
 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby55laKyxXWC6ND7ksC_eQUE253v4H-bsvyHQsibseXqH4_WBg4HSqaOnkfear0eZX7BQ/exec";
 
+/* 🔥 ЕДИНЫЙ СПИСОК (ДОЛЖЕН СОВПАДАТЬ С GAS) */
 const rewards = [
   "😅 ПОПРОБУЙ В СЛЕДУЮЩИЙ РАЗ",
   "🎁 СКИДКА 5%",
@@ -160,6 +163,7 @@ const colors = [
 let wheel = document.getElementById("wheel");
 let rotation = 0;
 
+/* 🎡 создание колеса */
 function createWheel(){
   let angle = 360 / rewards.length;
 
@@ -179,10 +183,11 @@ function createWheel(){
 
 createWheel();
 
+/* 🎰 spin */
 async function spin(){
 
   if(!telegram_id){
-    alert("❌ Ошибка Telegram WebApp");
+    alert("❌ Telegram error");
     return;
   }
 
@@ -199,23 +204,25 @@ async function spin(){
       let index = rewards.indexOf(data.reward);
 
       if(index === -1){
-        alert("Ошибка синхронизации наград");
+        alert("⚠️ Ошибка синхронизации наград");
+        console.log("SERVER:", data.reward);
         return;
       }
 
       let angle = 360 / rewards.length;
+      let extraSpins = 6 + Math.floor(Math.random()*4);
 
-      rotation += 360*6 + (360-(index*angle+angle/2));
+      rotation += 360 * extraSpins + (360 - (index * angle + angle/2));
 
       wheel.style.transform = `rotate(${rotation}deg)`;
 
       setTimeout(()=>{
         showWin(data.reward);
-      },5000);
+      },6000);
 
     }
     else if(data.status==="blocked"){
-      alert("⏳ Можно крутить только 1 раз в неделю!");
+      alert("⏳ Можно крутить 1 раз в неделю!");
     }
     else{
       alert("❌ "+data.message);
@@ -227,6 +234,7 @@ async function spin(){
   }
 }
 
+/* 🎉 popup */
 function showWin(text){
 
   let popup=document.getElementById("popup");
