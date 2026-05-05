@@ -215,11 +215,23 @@ function showWin(text){
 
   let popup=document.getElementById("popup");
 
-  popup.innerHTML =
-  "🎉 ПОЗДРАВЛЯЕМ!<br><br>" +
-  "🎯 Вы крутили рулетку<br><br>" +
-  "🏆 Ваш приз: " + text + "<br><br>" +
-  "⏳ Следующая попытка через 7 дней";
+  if(text === "😅 ПОПРОБУЙ СЛЕДУЮЩИЙ РАЗ"){
+
+    popup.innerHTML =
+      "😅 ПОПРОБУЙТЕ СЛЕДУЮЩИЙ РАЗ<br><br>" +
+      "🍀 В следующий раз точно повезёт!<br><br>" +
+      "⏳ Следующая попытка через 7 дней";
+
+  } else {
+
+    popup.innerHTML =
+      "🎉 ПОЗДРАВЛЯЕМ!<br><br>" +
+      "🎯 Вы крутили рулетку<br><br>" +
+      "🏆 Ваш приз: " + text + "<br><br>" +
+      "📦 Используйте при получении товара<br><br>" +
+      "⏳ Следующая попытка через 7 дней";
+  }
+
   popup.style.transform="translate(-50%,-50%) scale(1)";
 
   setTimeout(()=>{
