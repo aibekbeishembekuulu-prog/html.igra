@@ -91,9 +91,10 @@ button{
   cursor:pointer;
 }
 
+/* ИСПРАВЛЕННЫЙ POPUP */
 .popup{
   position:fixed;
-  top:45%;
+  top:70%;
   left:50%;
   transform:translate(-50%,-50%) scale(0);
   background:linear-gradient(45deg,#00f5ff,#ff00ff);
@@ -102,6 +103,9 @@ button{
   font-size:22px;
   font-weight:bold;
   transition:.3s;
+  z-index:999;
+  min-width:320px;
+  box-shadow:0 0 25px rgba(0,245,255,0.7);
 }
 </style>
 </head>
@@ -131,7 +135,6 @@ let telegram_id = tg.initDataUnsafe?.user?.id;
 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdy_js6f3Vtc-qkBuj189oE1r-bblfnehoNz6ZxgXFHmWpUaOH7edpD0AyUXXLIoyK2w/exec";
 
-/* ✅ НОВЫЕ ВЫИГРЫШИ */
 const rewards = [
   "😅 ПОПРОБУЙ СЛЕДУЮЩИЙ РАЗ",
   "🎁 СКИДКА 5%",
@@ -151,7 +154,6 @@ const colors = [
 let wheel = document.getElementById("wheel");
 let rotation = 0;
 
-/* создание колеса */
 function createWheel(){
   let angle = 360 / rewards.length;
 
@@ -167,7 +169,6 @@ function createWheel(){
 
 createWheel();
 
-/* 🎰 spin */
 async function spin(){
 
   if(!telegram_id){
@@ -210,7 +211,6 @@ async function spin(){
   }
 }
 
-/* 🎉 popup */
 function showWin(text){
 
   let popup=document.getElementById("popup");
@@ -224,7 +224,7 @@ function showWin(text){
 
   setTimeout(()=>{
     popup.style.transform="translate(-50%,-50%) scale(0)";
-  },3000);
+  },4000);
 }
 </script>
 
