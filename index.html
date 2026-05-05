@@ -51,14 +51,6 @@ h1{
   clip-path:polygon(0 0,100% 0,100% 100%);
 }
 
-.sector span{
-  position:absolute;
-  left:18px;
-  top:30px;
-  font-size:12px;
-  font-weight:bold;
-}
-
 .pointer{
   position:absolute;
   top:-25px;
@@ -135,25 +127,25 @@ button{
 let tg = window.Telegram.WebApp;
 tg.expand();
 
-/* ✅ ТВОЙ TELEGRAM ID */
 let telegram_id = tg.initDataUnsafe?.user?.id;
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzMgYJ0UXP5vMru_wL-GVsg3m5pEE3nyOIiGVqn-Sk_BspMDAufSOp5V_hzO9B1xECQfw/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdy_js6f3Vtc-qkBuj189oE1r-bblfnehoNz6ZxgXFHmWpUaOH7edpD0AyUXXLIoyK2w/exec";
 
+/* ✅ НОВЫЕ ВЫИГРЫШИ */
 const rewards = [
+  "😅 ПОПРОБУЙ СЛЕДУЮЩИЙ РАЗ",
   "🎁 СКИДКА 5%",
+  "🔥 СКИДКА 8%",
   "🎉 СКИДКА 10%",
-  "🔥 СКИДКА 12%",
-  "💎 СКИДКА 15%",
-  "😅 ПОПРОБУЙ СНОВА"
+  "💎 СКИДКА 12%"
 ];
 
 const colors = [
+  "#ef4444",
   "#ff00ff",
   "#00f5ff",
   "#22c55e",
-  "#facc15",
-  "#ef4444"
+  "#facc15"
 ];
 
 let wheel = document.getElementById("wheel");
@@ -163,16 +155,12 @@ let rotation = 0;
 function createWheel(){
   let angle = 360 / rewards.length;
 
-  rewards.forEach((text,i)=>{
+  rewards.forEach((_,i)=>{
     let sector=document.createElement("div");
     sector.className="sector";
     sector.style.background=colors[i];
     sector.style.transform=`rotate(${i*angle}deg) skewY(${90-angle}deg)`;
 
-    let label=document.createElement("span");
-    label.innerText=text;
-
-    sector.appendChild(label);
     wheel.appendChild(sector);
   });
 }
